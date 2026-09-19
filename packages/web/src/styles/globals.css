@@ -1,0 +1,240 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* ───────────────────────── design tokens (docs/05-frontend.md) ───────────────────────── */
+
+:root {
+  --bg-base: oklch(98.5% 0.003 250);
+  --bg-sidebar: oklch(97% 0.004 250);
+  --bg-surface: oklch(100% 0 0);
+  --bg-elevated: oklch(100% 0 0);
+  --bg-hover: oklch(95.5% 0.005 250);
+  --bg-active: oklch(93% 0.012 255);
+  --bg-inset: oklch(96% 0.004 250);
+
+  --fg-primary: oklch(20% 0.02 260);
+  --fg-secondary: oklch(45% 0.015 260);
+  --fg-muted: oklch(62% 0.012 260);
+  --fg-faint: oklch(78% 0.008 260);
+
+  --border-subtle: oklch(92% 0.006 250);
+  --border-strong: oklch(85% 0.01 250);
+
+  --accent: oklch(55% 0.19 255);
+  --accent-hover: oklch(50% 0.19 255);
+  --accent-soft: oklch(94% 0.04 255);
+  --accent-fg: oklch(100% 0 0);
+
+  --danger: oklch(58% 0.2 25);
+  --danger-soft: oklch(95% 0.03 25);
+  --warning: oklch(75% 0.16 75);
+  --warning-soft: oklch(96% 0.05 85);
+  --success: oklch(62% 0.15 150);
+  --success-soft: oklch(95% 0.04 150);
+
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04), 0 1px 3px oklch(0% 0 0 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.08), 0 1px 3px oklch(0% 0 0 / 0.06);
+  --shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.12), 0 2px 6px oklch(0% 0 0 / 0.06);
+
+  --c-blue: oklch(60% 0.17 250);
+  --c-violet: oklch(58% 0.18 300);
+  --c-pink: oklch(62% 0.19 350);
+  --c-orange: oklch(68% 0.17 50);
+  --c-amber: oklch(75% 0.15 80);
+  --c-green: oklch(62% 0.15 150);
+  --c-teal: oklch(62% 0.12 195);
+  --c-slate: oklch(50% 0.03 250);
+
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --bg-base: oklch(15% 0.008 260);
+  --bg-sidebar: oklch(13.5% 0.008 260);
+  --bg-surface: oklch(17.5% 0.008 260);
+  --bg-elevated: oklch(21% 0.01 260);
+  --bg-hover: oklch(21% 0.01 260);
+  --bg-active: oklch(25% 0.02 255);
+  --bg-inset: oklch(20% 0.008 260);
+
+  --fg-primary: oklch(93% 0.005 260);
+  --fg-secondary: oklch(72% 0.01 260);
+  --fg-muted: oklch(55% 0.01 260);
+  --fg-faint: oklch(40% 0.01 260);
+
+  --border-subtle: oklch(24% 0.008 260);
+  --border-strong: oklch(32% 0.01 260);
+
+  --accent: oklch(68% 0.17 255);
+  --accent-hover: oklch(73% 0.17 255);
+  --accent-soft: oklch(28% 0.06 255);
+  --accent-fg: oklch(12% 0.02 260);
+
+  --danger: oklch(68% 0.18 25);
+  --danger-soft: oklch(25% 0.05 25);
+  --warning: oklch(80% 0.15 80);
+  --warning-soft: oklch(27% 0.05 85);
+  --success: oklch(70% 0.14 150);
+  --success-soft: oklch(24% 0.05 150);
+
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.5);
+
+  --c-blue: oklch(72% 0.15 250);
+  --c-violet: oklch(72% 0.15 300);
+  --c-pink: oklch(74% 0.16 350);
+  --c-orange: oklch(76% 0.15 50);
+  --c-amber: oklch(80% 0.14 80);
+  --c-green: oklch(72% 0.14 150);
+  --c-teal: oklch(74% 0.11 195);
+  --c-slate: oklch(68% 0.03 250);
+
+  color-scheme: dark;
+}
+
+/* Map tokens into Tailwind utilities: bg-surface, text-muted, border-subtle, etc. */
+@theme inline {
+  --color-base: var(--bg-base);
+  --color-sidebar: var(--bg-sidebar);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-hover: var(--bg-hover);
+  --color-active: var(--bg-active);
+  --color-inset: var(--bg-inset);
+
+  --color-primary: var(--fg-primary);
+  --color-secondary: var(--fg-secondary);
+  --color-muted: var(--fg-muted);
+  --color-faint: var(--fg-faint);
+
+  --color-subtle: var(--border-subtle);
+  --color-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+
+  --color-c-blue: var(--c-blue);
+  --color-c-violet: var(--c-violet);
+  --color-c-pink: var(--c-pink);
+  --color-c-orange: var(--c-orange);
+  --color-c-amber: var(--c-amber);
+  --color-c-green: var(--c-green);
+  --color-c-teal: var(--c-teal);
+  --color-c-slate: var(--c-slate);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI',
+    'Noto Sans CJK SC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  --ease-out-quart: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ───────────────────────── base ───────────────────────── */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-base);
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* thin scrollbars that match the surface */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* new-mail pill entrance */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.animate-slide-down {
+  animation: slide-down 200ms var(--ease-out-quart);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 160ms var(--ease-out-quart);
+}

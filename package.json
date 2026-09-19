@@ -1,0 +1,27 @@
+{
+  "name": "oneinbox",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Lightweight self-hosted multi-account IMAP inbox aggregator",
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --stream dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "start": "pnpm --filter @inbox/server start"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2",
+      "better-sqlite3",
+      "esbuild"
+    ]
+  }
+}

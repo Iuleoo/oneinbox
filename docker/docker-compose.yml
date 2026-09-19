@@ -1,0 +1,25 @@
+services:
+  inbox:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      # Use the host's network/DNS during build; container-side DNS was unreliable on this host.
+      network: host
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-slim}
+        APT_MIRROR: ${APT_MIRROR:-deb.debian.org}
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+        SQLITE_PREBUILD_MIRROR: ${SQLITE_PREBUILD_MIRROR:-}
+    image: inbox:latest
+    container_name: inbox
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../.env
+    environment:
+      - DATA_DIR=/data
+    volumes:
+      - ../data:/data
+    stop_grace_period: 10s

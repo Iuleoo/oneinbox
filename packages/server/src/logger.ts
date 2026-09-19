@@ -1,0 +1,20 @@
+import pino from 'pino';
+import { config } from './config';
+
+export const logger = pino({
+  level: config.LOG_LEVEL,
+  ...(config.isProd
+    ? {}
+    : {
+        transport: {
+          target: 'pino-pretty',
+          options: { colorize: true, translateTime: 'HH:MM:ss', ignore: 'pid,hostname' },
+        },
+      }),
+  redact: {
+    paths: ['*.secret', '*.pass', '*.password', '*.accessToken', 'req.headers.cookie'],
+    censor: '[redacted]',
+  },
+});
+
+export type Logger = typeof logger;
