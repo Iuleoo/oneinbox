@@ -250,6 +250,8 @@ export const settingsSchema = z.object({
   showRemoteImages: z.enum(['never', 'ask', 'always']).default('ask'),
   trustedSenders: z.array(z.string().max(320)).max(500).default([]),
   bodyCacheMaxMb: z.number().int().min(10).max(10_000).default(500),
+  /** In dark mode, invert emails that force a light background. */
+  darkInvertEmails: z.boolean().default(true),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 export const settingsPatchSchema = settingsSchema.partial();
@@ -299,3 +301,6 @@ export const oauthCompleteSchema = z.object({
 });
 
 export type OAuthPendingStatus = { status: 'pending' } | { status: 'done'; accountId: number } | { status: 'error'; message: string } | { status: 'unknown' };
+
+export const folderPatchSchema = z.object({ subscribed: z.boolean() });
+export type FolderPatch = z.infer<typeof folderPatchSchema>;

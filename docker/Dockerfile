@@ -11,12 +11,16 @@ ARG NPM_REGISTRY=https://registry.npmjs.org/
 # Mirror for better-sqlite3 prebuilt binaries (empty = GitHub releases).
 ARG SQLITE_PREBUILD_MIRROR=
 
-RUN if [ "$APT_MIRROR" != "deb.debian.org" ]; then \
+# BuildKit cache mounts: apt package cache and the pnpm store survive between builds, so a
+# code-only change no longer re-downloads the toolchain and every dependency (~3 min saved).
+RUN rm -f /etc/apt/apt.conf.d/docker-clean \
+ && if [ "$APT_MIRROR" != "deb.debian.org" ]; then \
       sed -i "s|deb.debian.org|${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources; \
-    fi \
- && apt-get update \
- && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+    fi
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update \
+ && apt-get install -y --no-install-recommends python3 make g++ ca-certificates
 
 ENV npm_config_registry=${NPM_REGISTRY} \
     COREPACK_NPM_REGISTRY=${NPM_REGISTRY}
@@ -27,7 +31,9 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
 COPY packages/web/package.json packages/web/
-RUN if [ -n "$SQLITE_PREBUILD_MIRROR" ]; then \
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store,sharing=locked \
+    pnpm config set store-dir /root/.local/share/pnpm/store \
+ && if [ -n "$SQLITE_PREBUILD_MIRROR" ]; then \
       export npm_config_better_sqlite3_binary_host_mirror="$SQLITE_PREBUILD_MIRROR"; \
     fi \
  && pnpm install --frozen-lockfile

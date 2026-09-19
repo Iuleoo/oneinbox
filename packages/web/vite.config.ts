@@ -14,5 +14,17 @@ export default defineConfig({
       '/healthz': { target: 'http://localhost:8080', changeOrigin: false },
     },
   },
-  build: { outDir: 'dist', sourcemap: false },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          query: ['@tanstack/react-query', '@tanstack/react-virtual', 'zustand'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip', '@radix-ui/react-popover', '@radix-ui/react-tabs', '@radix-ui/react-switch', 'sonner', 'lucide-react'],
+        },
+      },
+    },
+  },
 });

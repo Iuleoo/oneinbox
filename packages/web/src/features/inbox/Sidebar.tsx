@@ -126,8 +126,19 @@ function FolderItem({ accountId, f, onNavigate }: { accountId: number; f: Folder
   const Icon = (f.specialUse && FOLDER_ICON[f.specialUse]) || Folder;
   const label = (f.specialUse && FOLDER_LABEL[f.specialUse]) || f.name;
   const isInbox = f.specialUse === '\\Inbox';
+  const qc = useQueryClient();
+  const toggle = useMutation({
+    mutationFn: () => api.accounts.patchFolder(accountId, f.id, { subscribed: !f.subscribed }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: qk.accounts });
+      qc.invalidateQueries({ queryKey: ['messages'] });
+      toast.success(r.subscribed ? `已开始同步「${label}」` : `已停止同步「${label}」`);
+    },
+    onError: (e) => toast.error('操作失败', { description: (e as Error).message }),
+  });
   return (
     <NavLink
+      onContextMenu={(e) => { if (isInbox) return; e.preventDefault(); if (confirm(f.subscribed ? `停止同步「${label}」？本地缓存的邮件会被清除，邮箱服务器不受影响。` : `开始同步「${label}」？`)) toggle.mutate(); }}
       to={isInbox ? `/a/${accountId}` : `/a/${accountId}/f/${f.id}`}
       end
       onClick={onNavigate}
@@ -139,7 +150,7 @@ function FolderItem({ accountId, f, onNavigate }: { accountId: number; f: Folder
         )
       }
       style={{ paddingLeft: 30 + f.depth * 12 }}
-      title={f.path}
+      title={f.subscribed ? `${f.path}（右键可停止同步）` : `${f.path}（未同步，右键可开启）`}
     >
       <Icon className="h-3.5 w-3.5 shrink-0 text-muted" strokeWidth={1.75} />
       <span className="flex-1 truncate">{label}</span>
@@ -156,7 +167,7 @@ function AccountItem({ account: a, onNavigate, onEdit }: { account: Account; onN
   const [manual, setManual] = useState<boolean | null>(null);
   useEffect(() => setManual(null), [isThisAccount]);
   const expanded = manual ?? isThisAccount;
-  const folders = a.folders.filter((f) => f.subscribed || f.unreadCount > 0);
+  const folders = a.folders;
   const sync = useMutation({ mutationFn: () => api.accounts.sync(a.id), onSuccess: () => toast.success('已触发同步') });
   const toggle = useMutation({
     mutationFn: () => api.accounts.patch(a.id, { enabled: !a.enabled }),

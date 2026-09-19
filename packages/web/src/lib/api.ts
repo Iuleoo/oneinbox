@@ -7,6 +7,8 @@ import type {
   ApiError,
   AuthStatus,
   Credentials,
+  FolderInfo,
+  FolderPatch,
   MessageBatch,
   MessageBatchResult,
   MessageBody,
@@ -79,6 +81,7 @@ export const api = {
     remove: (id: number) => request<void>('DELETE', `/api/accounts/${id}`),
     sync: (id: number) => request<{ ok: true }>('POST', `/api/accounts/${id}/sync`),
     resync: (id: number) => request<{ ok: true }>('POST', `/api/accounts/${id}/resync`),
+    patchFolder: (id: number, folderId: number, p: FolderPatch) => request<FolderInfo>('PATCH', `/api/accounts/${id}/folders/${folderId}`, p),
   },
   providers: () => request<ProviderInfo[]>('GET', '/api/providers'),
   oauth: {

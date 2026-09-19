@@ -7,6 +7,7 @@ import { applyTheme, hydrateSettingsFromServer, useUi } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/overlay';
+import { ShortcutsDialog } from '@/components/ShortcutsDialog';
 import { AuthPage } from '@/features/auth/AuthPage';
 import { Sidebar } from '@/features/inbox/Sidebar';
 import { MessageList } from '@/features/inbox/MessageList';
@@ -27,6 +28,7 @@ export function App() {
 
   return (
     <TooltipProvider>
+      <ShortcutsDialog />
       <Routes>
         <Route path="/login" element={<Gate mode="login" />} />
         <Route path="/setup" element={<Gate mode="setup" />} />

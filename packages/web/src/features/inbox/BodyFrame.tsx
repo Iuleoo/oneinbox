@@ -10,6 +10,7 @@ export function BodyFrame({ html, text, showRemoteImages }: { html: string | nul
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(200);
   const theme = useUi((s) => s.theme);
+  const invert = useUi((s) => s.darkInvertEmails);
   const dark = useMemo(() => isDark(), [theme]);
 
   const srcDoc = useMemo(() => {
@@ -53,10 +54,12 @@ export function BodyFrame({ html, text, showRemoteImages }: { html: string | nul
         }
       });
       // Dark mode: emails that force a white background get an inversion pass.
-      if (dark && html) {
+      if (dark && html && invert) {
         const bg = getComputedStyle(doc.body).backgroundColor;
         const forcesLight = /rgb\(2[3-5]\d, 2[3-5]\d, 2[3-5]\d\)/.test(bg) || /bgcolor=["']?#?(fff|ffffff|white)/i.test(html) || /background(-color)?:\s*#?(fff|ffffff|white)/i.test(html);
         doc.body.classList.toggle('invert-mode', forcesLight);
+      } else {
+        doc.body.classList.remove('invert-mode');
       }
       fit(doc);
     };
@@ -95,7 +98,7 @@ export function BodyFrame({ html, text, showRemoteImages }: { html: string | nul
       ro?.disconnect();
       cleanupWin?.();
     };
-  }, [srcDoc, showRemoteImages, dark, html]);
+  }, [srcDoc, showRemoteImages, dark, html, invert]);
 
   return (
     <iframe

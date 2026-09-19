@@ -24,6 +24,9 @@ export function SettingsPage() {
           <Row label="主题">
             <Segmented value={ui.theme} onChange={(v) => ui.setTheme(v as Theme)} options={[['system', '跟随系统'], ['light', '浅色'], ['dark', '深色']]} />
           </Row>
+          <Row label="深色模式下反色白底邮件" hint="营销邮件的品牌色可能失真，可关闭">
+            <Segmented value={ui.darkInvertEmails ? 'on' : 'off'} onChange={(v) => useUi.setState({ darkInvertEmails: v === 'on' })} options={[['on', '开'], ['off', '关']]} />
+          </Row>
         </Section>
 
         <Section title="阅读">

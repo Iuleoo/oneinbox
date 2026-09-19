@@ -19,11 +19,12 @@ interface UiState {
   trustedSenders: string[];
   trustSender: (addr: string) => void;
   bodyCacheMaxMb: number;
+  darkInvertEmails: boolean;
   /** True once server settings have been loaded into the store (enables write-back). */
   hydrated: boolean;
 }
 
-const SYNCED_KEYS = ['theme', 'autoMarkReadMs', 'showRemoteImages', 'trustedSenders', 'bodyCacheMaxMb'] as const;
+const SYNCED_KEYS = ['theme', 'autoMarkReadMs', 'showRemoteImages', 'trustedSenders', 'bodyCacheMaxMb', 'darkInvertEmails'] as const;
 
 export const useUi = create<UiState>()(
   persist(
@@ -40,9 +41,10 @@ export const useUi = create<UiState>()(
       trustedSenders: [],
       trustSender: (addr) => set((s) => ({ trustedSenders: [...new Set([...s.trustedSenders, addr.toLowerCase()])] })),
       bodyCacheMaxMb: 500,
+      darkInvertEmails: true,
       hydrated: false,
     }),
-    { name: 'inbox-ui', partialize: (s) => ({ theme: s.theme, listWidth: s.listWidth, autoMarkReadMs: s.autoMarkReadMs, showRemoteImages: s.showRemoteImages, trustedSenders: s.trustedSenders, bodyCacheMaxMb: s.bodyCacheMaxMb }) },
+    { name: 'inbox-ui', partialize: (s) => ({ theme: s.theme, listWidth: s.listWidth, autoMarkReadMs: s.autoMarkReadMs, showRemoteImages: s.showRemoteImages, trustedSenders: s.trustedSenders, bodyCacheMaxMb: s.bodyCacheMaxMb, darkInvertEmails: s.darkInvertEmails }) },
   ),
 );
 

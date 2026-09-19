@@ -414,8 +414,9 @@ export class AccountWorker {
           .where(and(eq(schema.folders.accountId, this.accountId), eq(schema.folders.path, box.path)))
           .get();
         if (existing) {
+          // Keep the user's subscription choice; only force-unsubscribe folders that became unselectable.
           tx.update(schema.folders)
-            .set({ displayName: box.name, specialUse, delimiter: box.delimiter ?? null, subscribed })
+            .set({ displayName: box.name, specialUse, delimiter: box.delimiter ?? null, ...(subscribed === 0 ? { subscribed: 0 } : {}) })
             .where(eq(schema.folders.id, existing.id))
             .run();
         } else {
@@ -655,22 +656,33 @@ export class AccountWorker {
       raw.push({ msg });
     }
 
-    // Second pass: small snippets from text/plain parts (one FETCH per message keeps it simple & safe).
+    // Second pass: snippets. Messages sharing the same text/plain part id (almost always "1" or
+    // "1.1") are fetched together with a single partial FETCH of the first 512 bytes, so a batch
+    // of 200 messages costs 2-3 round-trips instead of 200.
+    const groups = new Map<string, Array<{ uid: number; node: import('imapflow').MessageStructureObject }>>();
     for (const item of raw) {
-      let snippet: string | null = null;
       const struct = item.msg.bodyStructure;
-      const textNode = struct ? findTextPlain(struct) : null;
-      if (textNode?.part && (textNode.size ?? 0) <= SNIPPET_MAX_PART_SIZE && (textNode.size ?? 0) > 0) {
-        try {
-          const res = await client.fetchOne(String(item.msg.uid), { bodyParts: [`${textNode.part}`] }, { uid: true });
-          const part = res ? res.bodyParts?.get(textNode.part) : undefined;
-          if (part) snippet = makeSnippet(decodePart(part, textNode));
-        } catch (err) {
-          this.log.debug({ err, uid: item.msg.uid }, 'snippet fetch failed');
-        }
+      const node = struct ? findTextPlain(struct) : null;
+      if (node?.part && (node.size ?? 0) <= SNIPPET_MAX_PART_SIZE && (node.size ?? 0) > 0) {
+        const list = groups.get(node.part) ?? [];
+        list.push({ uid: item.msg.uid, node });
+        groups.set(node.part, list);
       }
-      out.push(parseFetchedMessage(this.accountId, folderId, item.msg, snippet));
     }
+    const snippets = new Map<number, string | null>();
+    for (const [part, list] of groups) {
+      const byUid = new Map(list.map((x) => [x.uid, x.node]));
+      try {
+        for await (const msg of client.fetch(list.map((x) => x.uid), { uid: true, bodyParts: [{ key: part, start: 0, maxLength: SNIPPET_BYTES }] }, { uid: true })) {
+          const buf = msg.bodyParts?.get(part);
+          const node = byUid.get(msg.uid);
+          if (buf && node) snippets.set(msg.uid, makeSnippet(decodePart(buf, node)));
+        }
+      } catch (err) {
+        this.log.debug({ err, part, count: list.length }, 'snippet batch fetch failed');
+      }
+    }
+    for (const item of raw) out.push(parseFetchedMessage(this.accountId, folderId, item.msg, snippets.get(item.msg.uid) ?? null));
     return out;
   }
 

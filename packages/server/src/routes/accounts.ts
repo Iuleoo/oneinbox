@@ -6,6 +6,7 @@ import {
   accountCreateSchema,
   accountConnectionSchema,
   accountPatchSchema,
+  folderPatchSchema,
   type Account,
   type AccountTestResult,
   type AccountColor,
@@ -217,6 +218,25 @@ export async function accountRoutes(app: FastifyInstance) {
     const ok = syncManager.requestSync(id);
     if (!ok) syncManager.startAccount(id);
     return { ok: true };
+  });
+
+  app.patch('/accounts/:id/folders/:folderId', async (req): Promise<FolderInfo> => {
+    const { id, folderId } = z.object({ id: z.coerce.number().int().positive(), folderId: z.coerce.number().int().positive() }).parse(req.params);
+    const body = folderPatchSchema.parse(req.body);
+    const db = getDb();
+    const f = db.select().from(schema.folders).where(and(eq(schema.folders.id, folderId), eq(schema.folders.accountId, id))).get();
+    if (!f) throw notFound('Folder');
+    if (f.specialUse === '\\Inbox') throw new AppError('VALIDATION', '收件箱不能取消同步');
+    db.transaction((tx) => {
+      tx.update(schema.folders).set({ subscribed: body.subscribed ? 1 : 0 }).where(eq(schema.folders.id, folderId)).run();
+      if (!body.subscribed) {
+        // Drop cached mail for an unsubscribed folder and forget its sync position.
+        tx.delete(schema.messages).where(eq(schema.messages.folderId, folderId)).run();
+        tx.update(schema.folders).set({ uidvalidity: null, uidnext: null, highestModseq: null, totalCount: 0, unreadCount: 0, lastSyncAt: null }).where(eq(schema.folders.id, folderId)).run();
+      }
+    });
+    if (body.subscribed) syncManager.requestSync(id);
+    return foldersByAccount().get(id)!.find((x) => x.id === folderId)!;
   });
 
   app.post('/accounts/:id/reauth', async (req) => {
