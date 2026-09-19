@@ -22,6 +22,10 @@
       "argon2",
       "better-sqlite3",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "esbuild@<0.25.0": ">=0.25.0",
+      "esbuild@>=0.27.3 <0.28.1": ">=0.28.1"
+    }
   }
 }
